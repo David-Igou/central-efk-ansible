@@ -1,0 +1,9 @@
+[local]
+localhost
+
+[kibana] #If no dedicated node, can just do logging[0]
+kibana.myorg.com
+
+[logging]
+efk1.myorg.com
+efk2.myorg.com

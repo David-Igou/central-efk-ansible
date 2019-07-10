@@ -1,0 +1,17 @@
+version: "3.1"
+services:
+
+  kibana:
+    image: kibana:7.2.0
+    environment:
+      ELASTICSEARCH_HOSTS: '["efk1.myorg.com","efk2.myorg.com "]'
+
+    ports:
+      - 5601:5601
+    networks:
+      - node_1
+
+networks:
+  node_1:
+    external: true
+

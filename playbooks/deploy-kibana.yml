@@ -1,0 +1,35 @@
+---
+ - hosts: kibana
+   tasks:
+
+     - docker_service:
+         project_src: /kibana
+         state: absent
+       ignore_errors: true
+
+     - name: Ensure compose dir does not exist
+       file:
+         path: /kibana
+         state: absent
+
+     - name: Create kibana directory
+       file:
+         path: /kibana
+         state: directory
+         mode: '0755'
+
+     - name: Generate Docker Compose
+       template:
+         src: "{{ inventory_dir}}/playbooks/templates/docker-compose-kibana.yml.j2"
+         dest: "/kibana/docker-compose.yml"
+
+     - docker_network:
+         name: node_1
+
+     - docker_service:
+         project_src: /kibana
+       register: output
+
+     - debug:
+         var: output
+

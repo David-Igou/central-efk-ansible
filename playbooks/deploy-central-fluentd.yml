@@ -1,27 +1,42 @@
 ---
  - hosts: logging
+   vars: 
+       certificate_password: "examplepassword"
+       fluentd_secret: "FLUENTD_SECRET"
    tasks:
- 
-# INCOMPLETE
-#Logic to install td-agent goes here
+     #TODO: Improve this - Manually add repo or something.
+     - name: Install td-agent
+       shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh | sh
 
+     - name: Install td-agent rubygem plugins
+       shell: td-agent-gem install "{{ item }}"
+       loop:
+          - fluent-plugin-secure-forward
+          - fluent-plugin-elasticsearch
 
      - name: Generate fluentd configuration
        template:
-         src: "{{ inventory_dir}}/playbooks/templates/td-agent.conf.j2"
-         dest: "/etc/td-agent/td-agent.yml"
+         src: "{{ inventory_dir}}/playbooks/templates/td-agent-server.conf.j2"
+         dest: "/etc/td-agent/td-agent.conf"
 
-#Ensure certs exist
+     - name: Check if cert exists
+       stat:   
+         path: /etc/td-agent/certs/ca_cert.pem
+       register: cert_stat_result
+       
+     - name: Check if key exist
+       stat:   
+         path: /etc/td-agent/certs/ca_key.pem
+       register: key_stat_result
+       
+     - name: If these files do not exists, regenerate certs
+       shell: /opt/td-agent/embedded/lib/ruby/gems/2.4.0/bin/secure-forward-ca-generate /etc/td-agent/certs {{ certificate_password }}
+       when: cert_stat_result.stat.exists == False or key_stat_result.stat.exists == False
 
      - name: Restart td-agent service
        systemd:
          name: td-agent
          state: restarted
+         enabled: yes
 
-     - docker_service:
-         project_src: /elasticsearch
-       register: output
-
-     - debug:
-         var: output
 

@@ -1,0 +1,26 @@
+<source>
+  @type secure_forward
+  port 24284
+  shared_key {{ fluentd_secret }}
+  self_hostname {{ ansible_fqdn }}
+  cert_auto_generate yes
+  ca_cert_path /etc/td-agent/certs/ca_cert.pem
+  ca_private_key_path /etc/td-agent/certs/ca_key.pem
+  ca_private_key_passphrase {{ certificate_password }}
+  secure no
+</source>
+
+# Store Data in Elasticsearch and S3
+<match *.**>
+  type copy
+  <store>
+    type elasticsearch
+    host localhost
+    port 9200
+    include_tag_key true
+    tag_key @log_name
+    logstash_format true
+    flush_interval 10s
+    logstash_dateformat %Y-%m-%d
+  </store>
+</match>
