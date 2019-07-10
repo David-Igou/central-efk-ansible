@@ -1,0 +1,36 @@
+version: "3.1"
+services:
+  elasticsearch:
+    image: elasticsearch:7.2.0
+    environment:
+      - node.name={{ ansible_fqdn }}
+      - cluster.name=my-cluster
+      - cluster.initial_master_nodes={% for host in groups['logging']  %}
+{{ host }}
+{%- if not loop.last %},{% endif %}
+{% endfor %}
+
+      - discovery.seed_hosts={% for host in groups['logging']  %}
+{{ host }}
+{%- if not loop.last %},{% endif %}
+{% endfor %}
+
+      - "ES_JAVA_OPTS=-Xms20g -Xmx20g"
+      - bootstrap.memory_lock=true
+      - network.publish_host={{ ansible_fqdn }}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - /elasticsearch_data:/usr/share/elasticsearch/data
+
+    networks:
+      - node_1
+
+networks:
+  node_1:
+    external: true

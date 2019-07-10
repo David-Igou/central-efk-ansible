@@ -1,0 +1,27 @@
+---
+ - hosts: logging
+   tasks:
+ 
+# INCOMPLETE
+#Logic to install td-agent goes here
+
+
+     - name: Generate fluentd configuration
+       template:
+         src: "{{ inventory_dir}}/playbooks/templates/td-agent.conf.j2"
+         dest: "/etc/td-agent/td-agent.yml"
+
+#Ensure certs exist
+
+     - name: Restart td-agent service
+       systemd:
+         name: td-agent
+         state: restarted
+
+     - docker_service:
+         project_src: /elasticsearch
+       register: output
+
+     - debug:
+         var: output
+

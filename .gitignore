@@ -1,0 +1,4 @@
+hosts.*
+ansible.log
+*.retry
+playbooks/roles/

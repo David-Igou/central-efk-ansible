@@ -1,0 +1,61 @@
+---
+ - hosts: logging
+   tasks:
+
+     - docker_service:
+         project_src: /elasticsearch
+         state: absent
+       ignore_errors: true
+
+     - name: Ensure compose dir does not exist
+       file:
+         path: /elasticsearch
+         state: absent
+
+     - name: Create elasticsearch directory
+       file:
+         path: /elasticsearch
+         state: directory
+         mode: '0755'
+
+     - name: Generate Docker Compose
+       template:
+         src: "{{ inventory_dir}}/playbooks/templates/docker-compose-elasticsearch.yml.j2"
+         dest: "/elasticsearch/docker-compose.yml"
+
+     - name: Create data directory
+       file:
+         path: /elasticsearch_data
+         state: directory
+         mode: '0755'
+         owner: 1000
+         group: 1000
+
+     - name: selinux context
+       sefcontext:
+         target: '/elasticsearch(/.*)?'
+         setype: svirt_sandbox_file_t
+         state: present
+
+     - name: selinux context
+       sefcontext:
+         target: '/elasticsearch_data(/.*)?'
+         setype: svirt_sandbox_file_t
+         state: present
+
+     - name: sysctl vm_max_map_count
+       sysctl:
+         name: vm.max_map_count
+         value: 262144
+         sysctl_set: yes
+
+     - docker_network:
+         name: node_1
+
+     - docker_service:
+         project_src: /elasticsearch
+       register: output
+
+     - debug:
+         var: output
+
