@@ -1,6 +1,6 @@
 <source>
   @type secure_forward
-  port 24284
+  port {{ fluentd_port }}
   shared_key {{ fluentd_secret }}
   self_hostname {{ ansible_fqdn }}
   cert_auto_generate yes
@@ -16,11 +16,11 @@
   <store>
     type elasticsearch
     host localhost
-    port 9200
+    port {{ elasticsearch_port }}
     include_tag_key true
     tag_key @log_name
-    logstash_format true
-    flush_interval 10s
+    logstash_format {{ elasticsearch_flush_interval }}
+    flush_interval {{ elasticsearch_logstash_format }}
     logstash_dateformat %Y-%m-%d
   </store>
 </match>

@@ -4,6 +4,24 @@ localhost
 [kibana] #If no dedicated node, can just do logging[0]
 kibana.myorg.com
 
-[logging]
+[logging] #I should probably separate these into separate groups?
 efk1.myorg.com
 efk2.myorg.com
+
+[logging:vars]
+fluentd_certificate_password="VoteNoToWarding"
+fluentd_secret="FLUENTD_SECRET"
+fluentd_server_port=24284
+
+elasticsearch_port=9200
+elasticsearch_flush_interval="10s"
+elasticsearch_logstash_format="true"
+
+
+[clients]
+host1.myorg.com
+host2.myorg.com
+host3.myorg.com
+
+[clients:vars]
+i_needto="write this"
