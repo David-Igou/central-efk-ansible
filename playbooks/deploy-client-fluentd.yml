@@ -1,0 +1,28 @@
+---
+ - hosts: clients
+   vars: 
+       certificate_password: "examplepassword"
+       fluentd_secret: "FLUENTD_SECRET"
+   tasks:
+     #TODO: Improve this - Manually add repo or something.
+     - name: Install td-agent
+       shell: curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh | sh
+
+     - name: Install td-agent rubygem plugins
+       shell: td-agent-gem install "{{ item }}"
+       loop:
+          - fluent-plugin-secure-forward
+          - fluent-plugin-elasticsearch
+
+     - name: Generate fluentd configuration
+       template:
+         src: "{{ inventory_dir}}/playbooks/templates/td-agent-client.conf.j2"
+         dest: "/etc/td-agent/td-agent.conf"
+
+     - name: Restart td-agent service
+       systemd:
+         name: td-agent
+         state: restarted
+         enabled: yes
+
+
